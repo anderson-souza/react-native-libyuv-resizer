@@ -44,7 +44,7 @@ class LibyuvResizerModuleRotationTest {
     mode: String = "contain"
   ): FakePromise {
     val promise = FakePromise()
-    module.resize(filePath, targetW, targetH, 80.0, rotation, mode, "", "box", false, promise)
+    module.resize(filePath, targetW, targetH, 80.0, rotation, mode, "", "box", false, "jpeg", promise)
     return promise
   }
 

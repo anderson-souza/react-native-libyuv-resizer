@@ -2,11 +2,12 @@
 
 ## Status
 
-**Phase:** Android complete (resize + rotate + legacy bridge) — planning keepMeta/EXIF copy
+**Phase:** Android complete (resize + rotate + legacy bridge + keepMeta/EXIF + WebP output)
 **Last updated:** 2026-05-16
 
 ## Active Work
 
+- [x] **WebP output format** — IMPLEMENTED; all 9 tasks done; TS + Android Kotlin compile clean; 28 Jest + Android JVM tests green; instrumented tests written (require device to run)
 - [x] **keepMeta / EXIF copy** — IMPLEMENTED; all 9 tasks done; Kotlin + TypeScript compile clean
   - T1: NativeLibyuvResizer.ts — add `keepMeta: boolean` param
   - T2: android/build.gradle — add exifinterface dep

@@ -42,7 +42,8 @@ describe('resize mode', () => {
         'contain',
         '',
         'box',
-        false
+        false,
+        'jpeg'
       );
     });
 
@@ -57,7 +58,8 @@ describe('resize mode', () => {
         'contain',
         '',
         'box',
-        false
+        false,
+        'jpeg'
       );
     });
 
@@ -72,7 +74,8 @@ describe('resize mode', () => {
         'contain',
         '',
         'box',
-        false
+        false,
+        'jpeg'
       );
     });
   });
@@ -89,7 +92,8 @@ describe('resize mode', () => {
         'cover',
         '',
         'box',
-        false
+        false,
+        'jpeg'
       );
     });
   });
@@ -106,7 +110,8 @@ describe('resize mode', () => {
         'stretch',
         '',
         'box',
-        false
+        false,
+        'jpeg'
       );
     });
   });
@@ -141,7 +146,8 @@ describe('resize mode', () => {
         'stretch',
         '',
         'box',
-        false
+        false,
+        'jpeg'
       );
     });
   });
@@ -159,7 +165,8 @@ describe('outputPath', () => {
       'contain',
       '',
       'box',
-      false
+      false,
+      'jpeg'
     );
   });
 
@@ -174,7 +181,8 @@ describe('outputPath', () => {
       'contain',
       '/tmp/out',
       'box',
-      false
+      false,
+      'jpeg'
     );
   });
 
@@ -189,7 +197,8 @@ describe('outputPath', () => {
       'contain',
       '',
       'box',
-      false
+      false,
+      'jpeg'
     );
   });
 
@@ -208,7 +217,8 @@ describe('outputPath', () => {
       'cover',
       '/sdcard/Pictures',
       'box',
-      false
+      false,
+      'jpeg'
     );
   });
 });
@@ -225,7 +235,8 @@ describe('keepMeta', () => {
       'contain',
       '',
       'box',
-      false
+      false,
+      'jpeg'
     );
   });
 
@@ -240,7 +251,8 @@ describe('keepMeta', () => {
       'contain',
       '',
       'box',
-      true
+      true,
+      'jpeg'
     );
   });
 
@@ -255,7 +267,8 @@ describe('keepMeta', () => {
       'contain',
       '',
       'box',
-      false
+      false,
+      'jpeg'
     );
   });
 
@@ -274,8 +287,120 @@ describe('keepMeta', () => {
       'cover',
       '/sdcard/out',
       'box',
-      true
+      true,
+      'jpeg'
     );
+  });
+});
+
+describe('format', () => {
+  it('omitting format with quality<100 defaults to jpeg', async () => {
+    await resize('/img.jpg', 400, 400, 80);
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      false,
+      'jpeg'
+    );
+  });
+
+  it('omitting format with quality=100 defaults to png', async () => {
+    await resize('/img.jpg', 400, 400, 100);
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      100,
+      0,
+      'contain',
+      '',
+      'box',
+      false,
+      'png'
+    );
+  });
+
+  it('format webp is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { format: 'webp' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      false,
+      'webp'
+    );
+  });
+
+  it('format jpeg explicit is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { format: 'jpeg' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      false,
+      'jpeg'
+    );
+  });
+
+  it('format png explicit is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { format: 'png' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      false,
+      'png'
+    );
+  });
+
+  it('format jpeg wins over quality=100 heuristic', async () => {
+    await resize('/img.jpg', 400, 400, 100, { format: 'jpeg' });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      100,
+      0,
+      'contain',
+      '',
+      'box',
+      false,
+      'jpeg'
+    );
+  });
+
+  it('invalid format throws TypeError and does not call native', async () => {
+    await expect(
+      resize('/img.jpg', 400, 400, 80, { format: 'gif' as any })
+    ).rejects.toThrow(TypeError);
+    expect(mockResize).not.toHaveBeenCalled();
+  });
+
+  it('invalid format error message includes the bad value', async () => {
+    await expect(
+      resize('/img.jpg', 400, 400, 80, { format: 'gif' as any })
+    ).rejects.toThrow("Invalid format: 'gif'");
   });
 });
 

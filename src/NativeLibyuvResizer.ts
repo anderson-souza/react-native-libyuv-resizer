@@ -42,11 +42,13 @@ export interface Spec extends TurboModule {
    * @param filePath    - Absolute path to the source image.
    * @param targetWidth - Output width in pixels.
    * @param targetHeight - Output height in pixels.
-   * @param quality     - JPEG quality `0–100`.
+   * @param quality     - JPEG/WebP quality `0–100`.
    * @param rotation    - Canonical rotation in degrees (`0 | 90 | 180 | 270`).
    * @param mode        - Resize mode string (`'contain' | 'cover' | 'stretch'`).
    * @param outputPath  - Absolute output path, or empty string for auto.
    * @param filterMode  - Scaling filter (`'none' | 'linear' | 'bilinear' | 'box'`).
+   * @param keepMeta    - Copy EXIF tags from source to output (JPEG only, Android only).
+   * @param format      - Output format (`'jpeg' | 'png' | 'webp'`).
    * @returns Metadata about the resized image.
    */
   resize(
@@ -58,7 +60,8 @@ export interface Spec extends TurboModule {
     mode: string,
     outputPath: string,
     filterMode: string,
-    keepMeta: boolean
+    keepMeta: boolean,
+    format: string
   ): Promise<ResizeResult>;
 }
 

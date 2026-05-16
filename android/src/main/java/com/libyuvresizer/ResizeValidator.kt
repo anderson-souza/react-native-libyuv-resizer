@@ -11,7 +11,8 @@ data class ResizeParams(
   val mode: String,
   val outputPath: String,
   val filterMode: String,
-  val keepMeta: Boolean = false
+  val keepMeta: Boolean = false,
+  val format: String = "jpeg"
 )
 
 sealed class ValidationResult {
@@ -23,6 +24,7 @@ object ResizeValidator {
   private val VALID_MODES = setOf("contain", "cover", "stretch")
   private val VALID_FILTER_MODES = setOf("none", "linear", "bilinear", "box")
   private val VALID_ROTATIONS = setOf(0, 90, 180, 270)
+  private val VALID_FORMATS = setOf("jpeg", "png", "webp")
 
   fun validate(params: ResizeParams): ValidationResult {
     if (!File(params.filePath).exists())
@@ -45,6 +47,11 @@ object ResizeValidator {
       return ValidationResult.Invalid(
         "E_INVALID_FILTER_MODE",
         "filterMode must be none, linear, bilinear, or box, got: ${params.filterMode}"
+      )
+    if (params.format !in VALID_FORMATS)
+      return ValidationResult.Invalid(
+        "E_INVALID_FORMAT",
+        "format must be jpeg, png, or webp, got: ${params.format}"
       )
     if (params.outputPath.isNotEmpty()) {
       val dir = File(params.outputPath)

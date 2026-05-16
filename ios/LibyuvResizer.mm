@@ -13,10 +13,12 @@ RCT_EXPORT_METHOD(resize:(NSString *)filePath
                   outputPath:(NSString *)outputPath
                   filterMode:(NSString *)filterMode
                   keepMeta:(BOOL)keepMeta
+                  format:(NSString *)format
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
     (void)keepMeta;
+    (void)format;
     reject(@"E_NOT_IMPLEMENTED", @"resize is not yet implemented on iOS", nil);
 }
 

@@ -65,6 +65,15 @@ class ResizeValidatorTest {
   }
 
   @Test
+  fun `all valid formats accepted`() {
+    val file = tmp.newFile("image.jpg")
+    for (fmt in listOf("jpeg", "png", "webp")) {
+      val result = ResizeValidator.validate(validParams(file.absolutePath).copy(format = fmt))
+      assertEquals("format $fmt should be Valid", ValidationResult.Valid, result)
+    }
+  }
+
+  @Test
   fun `quality boundary 1 accepted`() {
     val file = tmp.newFile("image.jpg")
     assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath).copy(quality = 1)))
@@ -132,6 +141,18 @@ class ResizeValidatorTest {
   }
 
   @Test
+  fun `invalid format returns E_INVALID_FORMAT`() {
+    val file = tmp.newFile("image.jpg")
+    assertCode("E_INVALID_FORMAT", validParams(file.absolutePath).copy(format = "gif"))
+  }
+
+  @Test
+  fun `empty format returns E_INVALID_FORMAT`() {
+    val file = tmp.newFile("image.jpg")
+    assertCode("E_INVALID_FORMAT", validParams(file.absolutePath).copy(format = ""))
+  }
+
+  @Test
   fun `nonexistent outputPath returns E_INVALID_OUTPUT_PATH`() {
     val file = tmp.newFile("image.jpg")
     assertCode("E_INVALID_OUTPUT_PATH", validParams(file.absolutePath, "/nonexistent/dir"))
@@ -171,5 +192,12 @@ class ResizeValidatorTest {
     val file = tmp.newFile("image.jpg")
     val result = ResizeValidator.validate(validParams(file.absolutePath).copy(filterMode = "cubic")) as ValidationResult.Invalid
     assertTrue(result.message.contains("cubic"))
+  }
+
+  @Test
+  fun `E_INVALID_FORMAT message includes got value`() {
+    val file = tmp.newFile("image.jpg")
+    val result = ResizeValidator.validate(validParams(file.absolutePath).copy(format = "gif")) as ValidationResult.Invalid
+    assertTrue(result.message.contains("gif"))
   }
 }

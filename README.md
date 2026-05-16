@@ -17,12 +17,13 @@ yarn add react-native-libyuv-resizer
 | `filePath`           | `string`        | —           | Absolute path to source image                                                     |
 | `targetWidth`        | `number`        | —           | Output width in pixels                                                            |
 | `targetHeight`       | `number`        | —           | Output height in pixels                                                           |
-| `quality`            | `number`        | —           | JPEG quality `1–100`. Use `100` to output PNG instead of JPEG.                   |
+| `quality`            | `number`        | —           | Compression quality `1–100`. Controls JPEG and WebP lossy level. Ignored for PNG. When `format` is omitted: `100` → PNG, else → JPEG. |
 | `options.rotation`   | `RotationAngle` | `0`         | Clockwise rotation before resize: `0 \| 90 \| 180 \| 270 \| -90 \| -180 \| -270` |
 | `options.mode`       | `ResizeMode`    | `'contain'` | How the image fits the target box: `'contain' \| 'cover' \| 'stretch'`           |
 | `options.filterMode` | `FilterMode`    | `'box'`     | Scaling filter: `'none' \| 'linear' \| 'bilinear' \| 'box'`                     |
 | `options.outputPath` | `string`        | auto        | Absolute directory path for the output file. Auto-generated in cache if omitted. |
-| `options.keepMeta`   | `boolean`       | `false`     | Copy EXIF metadata from source to output JPEG. Android only; no-op on iOS and PNG output. |
+| `options.keepMeta`   | `boolean`       | `false`     | Copy EXIF metadata from source to output JPEG. Android only; no-op on iOS, PNG and WebP output. |
+| `options.format`     | `OutputFormat`  | derived     | Output format: `'jpeg' \| 'png' \| 'webp'`. When specified, takes precedence over the `quality`-based heuristic. WebP is Android only; iOS produces JPEG. |
 
 ### Return value
 
@@ -43,6 +44,7 @@ interface ResizeResult {
 type RotationAngle = 0 | 90 | 180 | 270 | -90 | -180 | -270;
 type ResizeMode    = 'contain' | 'cover' | 'stretch';
 type FilterMode    = 'none' | 'linear' | 'bilinear' | 'box';
+type OutputFormat  = 'jpeg' | 'png' | 'webp';
 
 interface ResizeOptions {
   rotation?:   RotationAngle;
@@ -50,6 +52,7 @@ interface ResizeOptions {
   filterMode?: FilterMode;
   outputPath?: string;
   keepMeta?:   boolean;
+  format?:     OutputFormat;
 }
 ```
 
@@ -96,9 +99,17 @@ const result = await resize('/path/to/photo.jpg', 800, 600, 80, {
   outputPath: '/path/to/output-dir',
 });
 
-// PNG output (quality = 100)
-const result = await resize('/path/to/photo.jpg', 800, 600, 100);
+// PNG output — explicit format
+const result = await resize('/path/to/photo.jpg', 800, 600, 80, {
+  format: 'png',
+});
 console.log(result.path); // ends with .png
+
+// WebP output — smaller files than JPEG at equivalent quality (Android only)
+const result = await resize('/path/to/photo.jpg', 1280, 720, 85, {
+  format: 'webp',
+});
+console.log(result.path); // ends with .webp
 ```
 
 ### With react-native-image-picker
@@ -119,6 +130,28 @@ if (asset?.uri) {
 }
 ```
 
+## format — output format
+
+The `format` option explicitly controls the output container. When omitted, the library falls back to the legacy quality-based heuristic (`quality === 100` → PNG, otherwise JPEG).
+
+| Value    | Output | `quality` effect | Platform |
+| -------- | ------ | ---------------- | -------- |
+| `'jpeg'` | JPEG | Lossy compression level | Android, iOS |
+| `'png'`  | PNG  | Ignored (lossless) | Android, iOS |
+| `'webp'` | WebP lossy | Compression level | Android only; iOS produces JPEG |
+
+**Performance note:** WebP encoding is significantly slower than JPEG (~5–15× on typical Android devices) because it runs in software with no dedicated hardware accelerator. Use `format: 'webp'` when file size matters more than encoding speed.
+
+**Format vs quality precedence:**
+
+```ts
+// format wins — output is JPEG even though quality=100
+await resize(src, 800, 600, 100, { format: 'jpeg' });
+
+// no format — quality=100 heuristic applies → PNG (backward compat)
+await resize(src, 800, 600, 100);
+```
+
 ## keepMeta — EXIF preservation
 
 When `keepMeta: true`, all EXIF tags present in the source JPEG are copied to the output JPEG after encoding. This includes GPS coordinates, camera make/model, capture date, and any other tags supported by `androidx.exifinterface`.
@@ -128,7 +161,8 @@ When `keepMeta: true`, all EXIF tags present in the source JPEG are copied to th
 | Scenario | Result |
 | --- | --- |
 | `keepMeta: true` + JPEG output | EXIF tags copied; `Orientation` reset to normal |
-| `keepMeta: true` + PNG output (`quality=100`) | No-op — PNG has no standard EXIF |
+| `keepMeta: true` + PNG output | No-op — PNG has no standard EXIF |
+| `keepMeta: true` + WebP output | No-op — consistent with PNG behaviour |
 | `keepMeta: true` + iOS | No-op — iOS implementation pending |
 | `keepMeta: false` (default) | No EXIF copy; identical to previous behavior |
 | Source has no EXIF | Succeeds silently — output has no EXIF |
@@ -137,11 +171,11 @@ When `keepMeta: true`, all EXIF tags present in the source JPEG are copied to th
 
 ## Platform notes
 
-| Platform    | Backend                      | keepMeta |
-| ----------- | ---------------------------- | -------- |
-| Android     | libyuv (`ARGBScale`) via NDK | ✅ |
-| iOS         | Not yet implemented          | no-op |
-| Web / other | Throws — native only         | — |
+| Platform    | Backend                      | keepMeta | WebP output |
+| ----------- | ---------------------------- | -------- | ----------- |
+| Android     | libyuv (`ARGBScale`) via NDK | ✅       | ✅ (`WEBP_LOSSY` API 30+, `WEBP` fallback) |
+| iOS         | Not yet implemented          | no-op    | no-op (produces JPEG) |
+| Web / other | Throws — native only         | —        | — |
 
 ## Contributing
 
