@@ -10,7 +10,8 @@ data class ResizeParams(
   val rotation: Int,
   val mode: String,
   val outputPath: String,
-  val filterMode: String
+  val filterMode: String,
+  val keepMeta: Boolean = false
 )
 
 sealed class ValidationResult {

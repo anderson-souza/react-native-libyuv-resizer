@@ -90,6 +90,7 @@ export default function App() {
             rotation: mode.rotation,
             mode: 'cover',
             filterMode: 'box',
+            keepMeta: false,
           }
         );
         outputs.push({

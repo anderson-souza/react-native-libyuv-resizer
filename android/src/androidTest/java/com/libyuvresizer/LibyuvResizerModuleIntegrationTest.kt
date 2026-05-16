@@ -42,7 +42,7 @@ class LibyuvResizerModuleIntegrationTest {
     filterMode: String = "box"
   ): FakePromise {
     val promise = FakePromise()
-    module.resize(filePath, targetW, targetH, quality, rotation, mode, outputPath, filterMode, promise)
+    module.resize(filePath, targetW, targetH, quality, rotation, mode, outputPath, filterMode, false, promise)
     return promise
   }
 

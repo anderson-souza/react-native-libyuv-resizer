@@ -60,6 +60,14 @@ export interface ResizeOptions {
    * directory automatically.
    */
   outputPath?: string;
+
+  /**
+   * When `true`, copies all EXIF tags from the source image to the output
+   * JPEG. Has no effect on PNG output (`quality === 100`) or on iOS (no-op).
+   * @default false
+   * @platform android
+   */
+  keepMeta?: boolean;
 }
 
 const VALID_MODES: ResizeMode[] = ['contain', 'cover', 'stretch'];
@@ -130,6 +138,7 @@ export function resize(
     rotation,
     mode,
     options?.outputPath ?? '',
-    filterMode
+    filterMode,
+    options?.keepMeta ?? false
   );
 }

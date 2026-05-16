@@ -2,11 +2,21 @@
 
 ## Status
 
-**Phase:** Android complete (resize + rotate + legacy bridge) — iOS native impl next
-**Last updated:** 2026-05-14
+**Phase:** Android complete (resize + rotate + legacy bridge) — planning keepMeta/EXIF copy
+**Last updated:** 2026-05-16
 
 ## Active Work
 
+- [x] **keepMeta / EXIF copy** — IMPLEMENTED; all 9 tasks done; Kotlin + TypeScript compile clean
+  - T1: NativeLibyuvResizer.ts — add `keepMeta: boolean` param
+  - T2: android/build.gradle — add exifinterface dep
+  - T3: ResizeParams — add `keepMeta: Boolean = false`
+  - T4: ExifCopier.kt — new file
+  - T5: LibyuvResizerModule.kt — wire keepMeta + call ExifCopier
+  - T6: resizer.native.tsx — ResizeOptions + bridge arg
+  - T7: ios/LibyuvResizer.mm — accept keepMeta param
+  - T8: ExifCopierTest.kt — JVM unit tests
+  - T9: LibyuvResizerModuleExifTest.kt — instrumented tests
 - [ ] Legacy architecture support — spec/design/tasks at `.specs/features/legacy-arch-support/`
 - [x] Add libyuv git submodule
 - [x] Create `android/CMakeLists.txt` with libyuv integration
@@ -45,6 +55,11 @@
 | File encode/decode in Kotlin | Android codecs hardware-accelerated; keeps C++ stateless |
 | `quality=100` → PNG, else JPEG | Lossless path available without separate API param |
 | `outputPath=''` sentinel for absent param | TurboModule bridge requires fixed-arity positional args; no nullable strings |
+| `keepMeta` PNG no-op (silent) | PNG has no standard EXIF; erroring forces caller to guard on format+keepMeta combo |
+| `keepMeta` iOS no-op (silent) | iOS is stub; rejecting would force platform guards at every call site |
+| `ExifInterface` read failure → skip copy, no error | Corrupt EXIF is common; resize is still useful without metadata |
+| `ExifInterface` write failure → reject Promise | Output file is compromised; caller needs to know |
+| Reset `TAG_ORIENTATION` to normal after copy | Bitmap decoded with correct orientation; re-encoding creates a "normal" image |
 
 ## Blockers
 
