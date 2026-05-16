@@ -39,10 +39,11 @@ class LibyuvResizerModuleIntegrationTest {
     rotation: Double = 0.0,
     mode: String = "contain",
     outputPath: String = "",
-    filterMode: String = "box"
+    filterMode: String = "box",
+    format: String = "jpeg"
   ): FakePromise {
     val promise = FakePromise()
-    module.resize(filePath, targetW, targetH, quality, rotation, mode, outputPath, filterMode, false, promise)
+    module.resize(filePath, targetW, targetH, quality, rotation, mode, outputPath, filterMode, false, format, promise)
     return promise
   }
 
@@ -97,12 +98,11 @@ class LibyuvResizerModuleIntegrationTest {
   }
 
   @Test
-  fun resize_quality100_writesPng() {
-    // quality=100 → PNG format, extension .png in output path (empty outputPath → cacheDir with UUID)
+  fun resize_formatPng_writesPng() {
     val src = TestFixtures.createJpeg(reactContext, 100, 100, "square.jpg")
     createdFiles += src
 
-    val promise = resize(src, 50.0, 50.0, 100.0)
+    val promise = resize(src, 50.0, 50.0, 80.0, format = "png")
 
     assertTrue(promise.resolved)
     val outPath = (promise.result as ReadableMap).getString("path")!!

@@ -3,6 +3,7 @@ package com.libyuvresizer
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -21,6 +22,19 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
     const val NAME = NativeLibyuvResizerSpec.NAME
 
     private val FILTER_MODE_MAP = mapOf("none" to 0, "linear" to 1, "bilinear" to 2, "box" to 3)
+
+    @Suppress("DEPRECATION")
+    fun formatToExtAndCompressFormat(format: String): Pair<String, Bitmap.CompressFormat> =
+      when (format) {
+        "png" -> "png" to Bitmap.CompressFormat.PNG
+        "webp" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+          "webp" to Bitmap.CompressFormat.WEBP_LOSSY
+        } else {
+          "webp" to Bitmap.CompressFormat.WEBP
+        }
+
+        else -> "jpg" to Bitmap.CompressFormat.JPEG
+      }
 
     init {
       System.loadLibrary("libyuvresizer")
@@ -45,6 +59,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
     outputPath: String,
     filterMode: String,
     keepMeta: Boolean,
+    format: String,
     promise: Promise
   ) {
     try {
@@ -53,12 +68,24 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
       val q = quality.toInt()
       val rot = rotation.toInt()
 
-      val params = ResizeParams(filePath, targetW, targetH, q, rot, mode, outputPath, filterMode, keepMeta)
+      val params = ResizeParams(
+        filePath,
+        targetW,
+        targetH,
+        q,
+        rot,
+        mode,
+        outputPath,
+        filterMode,
+        keepMeta,
+        format
+      )
       when (val result = ResizeValidator.validate(params)) {
         is ValidationResult.Invalid -> {
           promise.reject(result.code, result.message)
           return
         }
+
         is ValidationResult.Valid -> Unit
       }
 
@@ -69,7 +96,12 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
 
       val decodeOpts = BitmapFactory.Options().apply {
         inSampleSize =
-          DimensionCalculator.calculateInSampleSize(boundsOpts.outWidth, boundsOpts.outHeight, targetW, targetH)
+          DimensionCalculator.calculateInSampleSize(
+            boundsOpts.outWidth,
+            boundsOpts.outHeight,
+            targetW,
+            targetH
+          )
         inPreferredConfig = bitmapConfig
       }
       val srcBitmap = BitmapFactory.decodeFile(filePath, decodeOpts)
@@ -84,7 +116,14 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
         val srcH = srcBitmap.height.toDouble()
 
         // cover scales to fill target on both axes — no cropping applied by design
-        val (dstW, dstH) = DimensionCalculator.computeDstDims(srcW, srcH, targetW, targetH, rot, mode)
+        val (dstW, dstH) = DimensionCalculator.computeDstDims(
+          srcW,
+          srcH,
+          targetW,
+          targetH,
+          rot,
+          mode
+        )
 
         val dstBitmap = createBitmap(dstW, dstH, bitmapConfig)
         try {
@@ -95,14 +134,13 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
             nativeResizeAndRotate(srcBitmap, dstBitmap, rot, filterModeInt)
           }
 
-          val ext = if (q == 100) "png" else "jpg"
+          val (ext, compressFmt) = formatToExtAndCompressFormat(params.format)
           val outFile = resolveOutputFile(filePath, outputPath, ext)
           FileOutputStream(outFile).use { fos ->
-            val fmt = if (q == 100) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
-            dstBitmap.compress(fmt, q, fos)
+            dstBitmap.compress(compressFmt, q, fos)
           }
 
-          if (params.keepMeta && ext == "jpg") {
+          if (params.keepMeta && params.format == "jpeg") {
             try {
               ExifCopier.copy(filePath, outFile.absolutePath)
             } catch (e: IOException) {

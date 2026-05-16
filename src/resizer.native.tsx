@@ -34,6 +34,18 @@ export type ResizeMode = 'contain' | 'cover' | 'stretch';
  */
 export type FilterMode = 'none' | 'linear' | 'bilinear' | 'box';
 
+/**
+ * Output image format.
+ *
+ * When omitted, format is derived from `quality`: `quality === 100` → `'png'`, else `'jpeg'`.
+ * When specified, this value takes precedence over the quality-based heuristic.
+ *
+ * - `'jpeg'` — lossy JPEG.
+ * - `'png'`  — lossless PNG. `quality` is ignored.
+ * - `'webp'` — lossy WebP. `quality` controls compression level *(Android only; iOS produces JPEG)*.
+ */
+export type OutputFormat = 'jpeg' | 'png' | 'webp';
+
 /** Options accepted by {@link resize}. */
 export interface ResizeOptions {
   /**
@@ -63,15 +75,23 @@ export interface ResizeOptions {
 
   /**
    * When `true`, copies all EXIF tags from the source image to the output
-   * JPEG. Has no effect on PNG output (`quality === 100`) or on iOS (no-op).
+   * JPEG. Has no effect on PNG or WebP output, or on iOS (no-op).
    * @default false
    * @platform android
    */
   keepMeta?: boolean;
+
+  /**
+   * Output image format. When omitted, `quality === 100` produces PNG; otherwise JPEG.
+   * Specifying `format` takes precedence over the quality-based heuristic.
+   * @default derived from quality
+   */
+  format?: OutputFormat;
 }
 
 const VALID_MODES: ResizeMode[] = ['contain', 'cover', 'stretch'];
 const VALID_FILTER_MODES: FilterMode[] = ['none', 'linear', 'bilinear', 'box'];
+const VALID_FORMATS: OutputFormat[] = ['jpeg', 'png', 'webp'];
 
 /** Normalises negative or out-of-range angles to 0 | 90 | 180 | 270. */
 function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
@@ -135,6 +155,11 @@ export function resize(
       new TypeError(`Invalid filter mode: '${filterMode}'`)
     );
   }
+  const format: OutputFormat =
+    options?.format ?? (quality === 100 ? 'png' : 'jpeg');
+  if (!VALID_FORMATS.includes(format)) {
+    return Promise.reject(new TypeError(`Invalid format: '${format}'`));
+  }
   return LibyuvResizer.resize(
     filePath,
     targetWidth,
@@ -144,6 +169,7 @@ export function resize(
     mode,
     options?.outputPath ?? '',
     filterMode,
-    options?.keepMeta ?? false
+    options?.keepMeta ?? false,
+    format
   );
 }

@@ -136,6 +136,23 @@
 
 ---
 
+## M4.6 — WebP Output Format ✅ COMPLETE
+
+**Goal:** Opt-in WebP lossy output via explicit `format` option in `ResizeOptions`
+
+### Features
+
+**WebP output (Android)** - DONE
+
+- `format?: 'jpeg' | 'png' | 'webp'` added to `ResizeOptions`
+- `OutputFormat` type exported from `resizer.native.tsx`
+- Format resolution in TS: explicit `format` wins; fallback: `quality===100→'png'`, else `'jpeg'`
+- Android: `formatToExtAndCompressFormat()` maps format → `Bitmap.CompressFormat`; API 30+ uses `WEBP_LOSSY`, older uses deprecated `WEBP`
+- `keepMeta + format='webp'` → silent no-op (consistent with PNG)
+- iOS: accepts `format` param, silently ignores it (stub behaviour unchanged)
+
+---
+
 ## M5 — Quality & Release
 
 **Goal:** Library publishable to npm with docs, tests, and CI all green  

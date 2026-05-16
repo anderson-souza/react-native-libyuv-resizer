@@ -34,9 +34,9 @@ class LibyuvResizerModuleOutputPathTest {
     createdFiles.clear()
   }
 
-  private fun resize(outputPath: String = "", quality: Double = 80.0): FakePromise {
+  private fun resize(outputPath: String = "", quality: Double = 80.0, format: String = "jpeg"): FakePromise {
     val promise = FakePromise()
-    module.resize(srcPath, 60.0, 60.0, quality, 0.0, "contain", outputPath, "box", false, promise)
+    module.resize(srcPath, 60.0, 60.0, quality, 0.0, "contain", outputPath, "box", false, format, promise)
     return promise
   }
 
@@ -84,9 +84,8 @@ class LibyuvResizerModuleOutputPathTest {
   }
 
   @Test
-  fun resize_quality100_emptyOutputPath_usesPngExtension() {
-    // When outputPath is empty, UUID filename uses computed ext = "png".
-    val promise = resize(outputPath = "", quality = 100.0)
+  fun resize_formatPng_emptyOutputPath_usesPngExtension() {
+    val promise = resize(outputPath = "", format = "png")
 
     assertTrue(promise.resolved)
     val outPath = (promise.result as ReadableMap).getString("path")!!

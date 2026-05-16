@@ -51,10 +51,11 @@ class LibyuvResizerModuleExifTest {
     private fun resize(
         filePath: String,
         keepMeta: Boolean,
-        quality: Double = 80.0
+        quality: Double = 80.0,
+        format: String = "jpeg"
     ): FakePromise {
         val promise = FakePromise()
-        module.resize(filePath, 100.0, 100.0, quality, 0.0, "contain", "", "box", keepMeta, promise)
+        module.resize(filePath, 100.0, 100.0, quality, 0.0, "contain", "", "box", keepMeta, format, promise)
         return promise
     }
 
@@ -113,7 +114,7 @@ class LibyuvResizerModuleExifTest {
 
         // keepMeta defaults to false in the bridge call
         val promise = FakePromise()
-        module.resize(src, 100.0, 100.0, 80.0, 0.0, "contain", "", "box", false, promise)
+        module.resize(src, 100.0, 100.0, 80.0, 0.0, "contain", "", "box", false, "jpeg", promise)
 
         assertTrue(promise.resolved)
         val outPath = (promise.result as ReadableMap).getString("path")!!
@@ -124,11 +125,11 @@ class LibyuvResizerModuleExifTest {
     }
 
     @Test
-    fun `resize PNG with keepMeta true resolves without error`() {
+    fun `resize PNG format with keepMeta true resolves without error`() {
         val src = createJpegWithGps("exif_int_png_src.jpg")
 
-        // quality=100 → PNG output; keepMeta is no-op for PNG
-        val promise = resize(src, keepMeta = true, quality = 100.0)
+        // format=png → PNG output; keepMeta is no-op for PNG
+        val promise = resize(src, keepMeta = true, format = "png")
 
         assertTrue("expected resolved, got: ${promise.errorCode}: ${promise.errorMessage}", promise.resolved)
         val outPath = (promise.result as ReadableMap).getString("path")!!
