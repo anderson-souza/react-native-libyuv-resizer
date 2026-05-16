@@ -140,6 +140,8 @@ The `format` option explicitly controls the output container. When omitted, the 
 | `'png'`  | PNG  | Ignored (lossless) | Android, iOS |
 | `'webp'` | WebP lossy | Compression level | Android only; iOS produces JPEG |
 
+**Performance note:** WebP encoding is significantly slower than JPEG (~5–15× on typical Android devices) because it runs in software with no dedicated hardware accelerator. Use `format: 'webp'` when file size matters more than encoding speed.
+
 **Format vs quality precedence:**
 
 ```ts
