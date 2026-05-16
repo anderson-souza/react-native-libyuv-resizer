@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Environment
 
 - **Shell:** Use PowerShell tool for all commands — Bash tool fails (no `/mnt/e/` mount on Windows).
-- **File search:** Glob tool times out on this repo; use `Get-ChildItem` via PowerShell instead.
+- **File search:** Glob tool times out on this repo; use `Get-ChildItem` via PowerShell instead. Never run `Get-ChildItem` or `find` from repo root — `node_modules` causes 1.4MB output/timeout. Always target a specific subpath (e.g. `android/src`, `src/`).
 
 ## Commands
 
@@ -81,10 +81,29 @@ The codegen config in `package.json` (`codegenConfig`) generates the native spec
 
 Separate yarn workspace (`react-native-libyuv-resizer-example`). Run example commands via `yarn example <cmd>` from root or directly inside `example/`.
 
+## Android Build
+
+`gradlew` lives in `example/android/` — the library has no standalone gradlew. Gradle project name is `:react-native-libyuv-resizer`.
+
+```bash
+# Compile library Kotlin
+cd example/android && ./gradlew :react-native-libyuv-resizer:compileDebugKotlin
+
+# Compile instrumented tests
+./gradlew :react-native-libyuv-resizer:compileDebugAndroidTestKotlin
+
+# Run instrumented tests (requires connected emulator/device)
+./gradlew :react-native-libyuv-resizer:connectedDebugAndroidTest
+
+# Run specific test class
+./gradlew :react-native-libyuv-resizer:connectedDebugAndroidTest --tests "com.libyuvresizer.ClassName"
+```
+
 ## Gotchas
 
 - **RN codegen + Promise payload:** Inline object literal (`Promise<{ path: string }>`) breaks codegen. Always declare a named exported type (`export type Foo = { ... }`) and reference it.
 - **Android tests:** `Arguments.createMap()` available in `androidTest/` (instrumented, has Android runtime) but not in `test/` (JVM unit tests). Don't use WritableMap/ReadableMap in JVM tests.
+- **Bridge param changes break all TS tests:** Adding a param to `NativeLibyuvResizer.ts` breaks every `toHaveBeenCalledWith` in `index.test.tsx`. Update all expected arg lists when the bridge signature changes.
 
 ## Key Details
 
