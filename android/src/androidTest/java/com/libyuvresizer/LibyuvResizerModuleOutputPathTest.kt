@@ -36,7 +36,7 @@ class LibyuvResizerModuleOutputPathTest {
 
   private fun resize(outputPath: String = "", quality: Double = 80.0): FakePromise {
     val promise = FakePromise()
-    module.resize(srcPath, 60.0, 60.0, quality, 0.0, "contain", outputPath, "box", promise)
+    module.resize(srcPath, 60.0, 60.0, quality, 0.0, "contain", outputPath, "box", false, promise)
     return promise
   }
 

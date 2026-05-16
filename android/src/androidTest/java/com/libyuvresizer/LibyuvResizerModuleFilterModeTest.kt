@@ -35,7 +35,7 @@ class LibyuvResizerModuleFilterModeTest {
 
   private fun resizeWithFilter(filterMode: String): FakePromise {
     val promise = FakePromise()
-    module.resize(srcPath, 60.0, 60.0, 80.0, 0.0, "contain", "", filterMode, promise)
+    module.resize(srcPath, 60.0, 60.0, 80.0, 0.0, "contain", "", filterMode, false, promise)
     return promise
   }
 

@@ -60,6 +60,14 @@ export interface ResizeOptions {
    * directory automatically.
    */
   outputPath?: string;
+
+  /**
+   * When `true`, copies all EXIF tags from the source image to the output
+   * JPEG. Has no effect on PNG output (`quality === 100`) or on iOS (no-op).
+   * @default false
+   * @platform android
+   */
+  keepMeta?: boolean;
 }
 
 const VALID_MODES: ResizeMode[] = ['contain', 'cover', 'stretch'];
@@ -80,8 +88,8 @@ function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
  * @param filePath - Absolute path to the source image.
  * @param targetWidth - Output width in pixels (must be > 0).
  * @param targetHeight - Output height in pixels (must be > 0).
- * @param quality - JPEG encoding quality from `0` (lowest) to `100` (highest).
- *   Only applies to the JPEG output; the resize itself is lossless.
+ * @param quality - JPEG encoding quality from `1` (lowest) to `100` (highest).
+ *   Use `100` to produce PNG output instead of JPEG.
  * @param options - Optional resize behaviour overrides.
  * @returns A `Promise` that resolves to a {@link ResizeResult} with the output
  *   file path, URI, size, name, and dimensions.
@@ -99,7 +107,12 @@ function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
  *   rotation: 90,
  *   mode: 'cover',
  *   filterMode: 'bilinear',
- *   outputPath: '/path/to/output.jpg',
+ *   outputPath: '/path/to/output-dir',
+ * });
+ *
+ * // Preserve EXIF (GPS, camera, date) — Android only
+ * const result = await resize('/path/to/photo.jpg', 800, 600, 80, {
+ *   keepMeta: true,
  * });
  * ```
  */
@@ -130,6 +143,7 @@ export function resize(
     rotation,
     mode,
     options?.outputPath ?? '',
-    filterMode
+    filterMode,
+    options?.keepMeta ?? false
   );
 }

@@ -57,7 +57,8 @@ export interface Spec extends TurboModule {
     rotation: number,
     mode: string,
     outputPath: string,
-    filterMode: string
+    filterMode: string,
+    keepMeta: boolean
   ): Promise<ResizeResult>;
 }
 

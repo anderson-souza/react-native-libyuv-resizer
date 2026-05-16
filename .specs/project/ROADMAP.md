@@ -118,6 +118,24 @@
 
 ---
 
+## M4.5 — keepMeta / EXIF Copy
+
+**Goal:** Opt-in EXIF metadata preservation from source JPEG to resized JPEG output  
+**Status:** Spec complete — design + tasks pending
+
+### Features
+
+**keepMeta option (Android)** - PLANNED
+
+- `keepMeta?: boolean` added to `ResizeOptions` (default `false`)
+- Android: `ExifInterface` reads all tags from source → copies to output JPEG after `Bitmap.compress`
+- `TAG_ORIENTATION` reset to `ORIENTATION_NORMAL` post-copy (image already decoded correctly)
+- PNG output (`quality=100`) + `keepMeta: true` → silent no-op, Promise resolves
+- iOS `keepMeta: true` → silent no-op (iOS still stub)
+- `androidx.exifinterface:exifinterface` added as `implementation` dep
+
+---
+
 ## M5 — Quality & Release
 
 **Goal:** Library publishable to npm with docs, tests, and CI all green  
