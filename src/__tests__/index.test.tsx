@@ -41,7 +41,8 @@ describe('resize mode', () => {
         0,
         'contain',
         '',
-        'box'
+        'box',
+        false
       );
     });
 
@@ -55,7 +56,8 @@ describe('resize mode', () => {
         0,
         'contain',
         '',
-        'box'
+        'box',
+        false
       );
     });
 
@@ -69,7 +71,8 @@ describe('resize mode', () => {
         0,
         'contain',
         '',
-        'box'
+        'box',
+        false
       );
     });
   });
@@ -85,7 +88,8 @@ describe('resize mode', () => {
         0,
         'cover',
         '',
-        'box'
+        'box',
+        false
       );
     });
   });
@@ -101,7 +105,8 @@ describe('resize mode', () => {
         0,
         'stretch',
         '',
-        'box'
+        'box',
+        false
       );
     });
   });
@@ -135,7 +140,8 @@ describe('resize mode', () => {
         270,
         'stretch',
         '',
-        'box'
+        'box',
+        false
       );
     });
   });
@@ -152,7 +158,8 @@ describe('outputPath', () => {
       0,
       'contain',
       '',
-      'box'
+      'box',
+      false
     );
   });
 
@@ -166,7 +173,8 @@ describe('outputPath', () => {
       0,
       'contain',
       '/tmp/out',
-      'box'
+      'box',
+      false
     );
   });
 
@@ -180,7 +188,8 @@ describe('outputPath', () => {
       0,
       'contain',
       '',
-      'box'
+      'box',
+      false
     );
   });
 
@@ -198,7 +207,74 @@ describe('outputPath', () => {
       90,
       'cover',
       '/sdcard/Pictures',
-      'box'
+      'box',
+      false
+    );
+  });
+});
+
+describe('keepMeta', () => {
+  it('omitting keepMeta passes false to native', async () => {
+    await resize('/img.jpg', 400, 400, 80);
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      false
+    );
+  });
+
+  it('keepMeta: true is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { keepMeta: true });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      true
+    );
+  });
+
+  it('keepMeta: false is forwarded to native', async () => {
+    await resize('/img.jpg', 400, 400, 80, { keepMeta: false });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      400,
+      400,
+      80,
+      0,
+      'contain',
+      '',
+      'box',
+      false
+    );
+  });
+
+  it('keepMeta combined with outputPath and mode', async () => {
+    await resize('/img.jpg', 800, 600, 85, {
+      keepMeta: true,
+      mode: 'cover',
+      outputPath: '/sdcard/out',
+    });
+    expect(mockResize).toHaveBeenCalledWith(
+      '/img.jpg',
+      800,
+      600,
+      85,
+      0,
+      'cover',
+      '/sdcard/out',
+      'box',
+      true
     );
   });
 });
