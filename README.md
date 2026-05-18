@@ -2,6 +2,12 @@
 
 High-performance image resizer for React Native using libyuv (Android).
 
+## Requirements
+
+- React Native >= 0.72.0
+- New Architecture (Turbo Modules) enabled or disabled — both supported
+- Android only (iOS stubbed)
+
 ## Installation
 
 ```sh

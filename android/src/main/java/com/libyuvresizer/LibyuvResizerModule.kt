@@ -12,7 +12,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.UUID
-import androidx.core.graphics.createBitmap
 
 @ReactModule(name = LibyuvResizerModule.NAME)
 class LibyuvResizerModule(reactContext: ReactApplicationContext) :
@@ -125,7 +124,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
           mode
         )
 
-        val dstBitmap = createBitmap(dstW, dstH, bitmapConfig)
+        val dstBitmap = Bitmap.createBitmap(dstW, dstH, bitmapConfig)
         try {
           val filterModeInt = FILTER_MODE_MAP.getValue(filterMode)
           if (rot == 0) {
