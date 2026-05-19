@@ -15,7 +15,9 @@
   "files": [
     "src",
     "lib",
+    "libyuv",
     "android",
+    "android/libyuv",
     "ios",
     "cpp",
     "*.podspec",
@@ -34,7 +36,7 @@
   "scripts": {
     "example": "yarn workspace react-native-libyuv-resizer-example",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "prepare": "bob build",
+    "prepare": "git submodule update --init --recursive && bob build",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "test": "jest",
