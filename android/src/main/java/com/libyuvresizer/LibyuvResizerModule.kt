@@ -134,7 +134,7 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
           }
 
           val (ext, compressFmt) = formatToExtAndCompressFormat(params.format)
-          val outFile = resolveOutputFile(filePath, outputPath, ext)
+          val outFile = resolveOutputFile(outputPath, ext)
           FileOutputStream(outFile).use { fos ->
             dstBitmap.compress(compressFmt, q, fos)
           }
@@ -168,11 +168,11 @@ class LibyuvResizerModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  private fun resolveOutputFile(inputFilePath: String, outputPath: String, ext: String): File {
+  private fun resolveOutputFile(outputPath: String, ext: String): File {
     if (outputPath.isEmpty()) {
       return File(reactApplicationContext.cacheDir, "${UUID.randomUUID()}.$ext")
     }
-    return File(outputPath, File(inputFilePath).name)
+    return File(outputPath)
   }
 
 }

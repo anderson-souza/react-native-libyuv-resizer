@@ -171,7 +171,7 @@ describe('outputPath', () => {
   });
 
   it('provided outputPath is forwarded to native', async () => {
-    await resize('/img.jpg', 400, 400, 80, { outputPath: '/tmp/out' });
+    await resize('/img.jpg', 400, 400, 80, { outputPath: '/tmp/out.jpg' });
     expect(mockResize).toHaveBeenCalledWith(
       '/img.jpg',
       400,
@@ -179,7 +179,7 @@ describe('outputPath', () => {
       80,
       0,
       'contain',
-      '/tmp/out',
+      '/tmp/out.jpg',
       'box',
       false,
       'jpeg'
@@ -206,7 +206,7 @@ describe('outputPath', () => {
     await resize('/img.jpg', 800, 600, 90, {
       mode: 'cover',
       rotation: 90,
-      outputPath: '/sdcard/Pictures',
+      outputPath: '/sdcard/Pictures/resized.jpg',
     });
     expect(mockResize).toHaveBeenCalledWith(
       '/img.jpg',
@@ -215,7 +215,7 @@ describe('outputPath', () => {
       90,
       90,
       'cover',
-      '/sdcard/Pictures',
+      '/sdcard/Pictures/resized.jpg',
       'box',
       false,
       'jpeg'
@@ -276,7 +276,7 @@ describe('keepMeta', () => {
     await resize('/img.jpg', 800, 600, 85, {
       keepMeta: true,
       mode: 'cover',
-      outputPath: '/sdcard/out',
+      outputPath: '/sdcard/out.jpg',
     });
     expect(mockResize).toHaveBeenCalledWith(
       '/img.jpg',
@@ -285,7 +285,7 @@ describe('keepMeta', () => {
       85,
       0,
       'cover',
-      '/sdcard/out',
+      '/sdcard/out.jpg',
       'box',
       true,
       'jpeg'

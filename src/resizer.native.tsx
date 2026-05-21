@@ -67,7 +67,9 @@ export interface ResizeOptions {
   filterMode?: FilterMode;
 
   /**
-   * Absolute path for the output file.
+   * Full absolute path for the output file, including directory, filename,
+   * and extension (e.g. `'/sdcard/Pictures/thumb.jpg'`).
+   * The parent directory must already exist.
    * When omitted the native layer generates a path in the app's cache
    * directory automatically.
    */
@@ -127,7 +129,7 @@ function toCanonicalAngle(angle: RotationAngle): 0 | 90 | 180 | 270 {
  *   rotation: 90,
  *   mode: 'cover',
  *   filterMode: 'bilinear',
- *   outputPath: '/path/to/output-dir',
+ *   outputPath: '/path/to/output/thumb.jpg',
  * });
  *
  * // Preserve EXIF (GPS, camera, date) — Android only
