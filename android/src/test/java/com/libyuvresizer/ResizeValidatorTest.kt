@@ -5,6 +5,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
 
 class ResizeValidatorTest {
 
@@ -31,10 +32,11 @@ class ResizeValidatorTest {
   }
 
   @Test
-  fun `valid params with directory outputPath returns Valid`() {
+  fun `valid params with full file outputPath in existing dir returns Valid`() {
     val file = tmp.newFile("image.jpg")
     val dir = tmp.newFolder("out")
-    assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath, dir.absolutePath)))
+    val outputFile = File(dir, "thumb.jpg")
+    assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath, outputFile.absolutePath)))
   }
 
   @Test
@@ -153,16 +155,16 @@ class ResizeValidatorTest {
   }
 
   @Test
-  fun `nonexistent outputPath returns E_INVALID_OUTPUT_PATH`() {
+  fun `outputPath with nonexistent parent dir returns E_INVALID_OUTPUT_PATH`() {
     val file = tmp.newFile("image.jpg")
-    assertCode("E_INVALID_OUTPUT_PATH", validParams(file.absolutePath, "/nonexistent/dir"))
+    assertCode("E_INVALID_OUTPUT_PATH", validParams(file.absolutePath, "/nonexistent/dir/output.jpg"))
   }
 
   @Test
-  fun `outputPath pointing to file returns E_INVALID_OUTPUT_PATH`() {
+  fun `outputPath pointing to existing file is valid (will be overwritten)`() {
     val file = tmp.newFile("image.jpg")
-    val notDir = tmp.newFile("output.jpg")
-    assertCode("E_INVALID_OUTPUT_PATH", validParams(file.absolutePath, notDir.absolutePath))
+    val existingFile = tmp.newFile("output.jpg")
+    assertEquals(ValidationResult.Valid, ResizeValidator.validate(validParams(file.absolutePath, existingFile.absolutePath)))
   }
 
   // --- error message content ---

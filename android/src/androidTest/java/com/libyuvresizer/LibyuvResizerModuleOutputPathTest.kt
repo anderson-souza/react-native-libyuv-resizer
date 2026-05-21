@@ -55,32 +55,26 @@ class LibyuvResizerModuleOutputPathTest {
   }
 
   @Test
-  fun resize_customOutputPath_writesToProvidedDir() {
-    val destDir = reactContext.filesDir
-    val promise = resize(outputPath = destDir.absolutePath)
+  fun resize_customOutputPath_writesToExactPath() {
+    val destFile = File(reactContext.filesDir, "custom-output.jpg")
+    val promise = resize(outputPath = destFile.absolutePath)
 
     assertTrue(promise.resolved)
     val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
-    assertTrue(
-      "output must be inside filesDir",
-      outPath.startsWith(destDir.absolutePath)
-    )
+    assertEquals("output must be at exact path", destFile.absolutePath, outPath)
     assertTrue(File(outPath).exists())
   }
 
   @Test
-  fun resize_customOutputPath_keepsInputFilename() {
-    // resolveOutputFile uses File(inputFilePath).name → output filename = input filename.
-    // "output_path_src.jpg" is kept even when quality=100 (ext would be "png").
-    val destDir = reactContext.filesDir
-    val promise = resize(outputPath = destDir.absolutePath)
+  fun resize_customOutputPath_usesExactFilename() {
+    val destFile = File(reactContext.filesDir, "my-resized.jpg")
+    val promise = resize(outputPath = destFile.absolutePath)
 
     assertTrue(promise.resolved)
     val outPath = (promise.result as ReadableMap).getString("path")!!
     createdFiles += outPath
-    val outputFilename = File(outPath).name
-    assertEquals("output_path_src.jpg", outputFilename)
+    assertEquals("my-resized.jpg", File(outPath).name)
   }
 
   @Test

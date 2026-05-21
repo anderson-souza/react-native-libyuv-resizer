@@ -54,16 +54,11 @@ object ResizeValidator {
         "format must be jpeg, png, or webp, got: ${params.format}"
       )
     if (params.outputPath.isNotEmpty()) {
-      val dir = File(params.outputPath)
-      if (!dir.exists())
+      val parentDir = File(params.outputPath).parentFile
+      if (parentDir == null || !parentDir.exists())
         return ValidationResult.Invalid(
           "E_INVALID_OUTPUT_PATH",
-          "Output directory does not exist: ${params.outputPath}"
-        )
-      if (!dir.isDirectory)
-        return ValidationResult.Invalid(
-          "E_INVALID_OUTPUT_PATH",
-          "outputPath must be a directory, not a file: ${params.outputPath}"
+          "Output directory does not exist: ${File(params.outputPath).parent}"
         )
     }
     return ValidationResult.Valid
